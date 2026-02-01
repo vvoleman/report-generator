@@ -5,13 +5,13 @@ Symfony (PHP 8.2+) application for generating styled XLSX reports from Toggl Tra
 ## Features
 
 - **User Authentication**: Secure login and registration system
-- **Toggl OAuth2 Integration**: Connect your Toggl Track account securely via OAuth2
+- **Toggl API Token Integration**: Simple API token configuration in settings
 - **Time Entry Fetching**: Retrieve time entries for any selected month
 - **Data Aggregation**: Aggregate hours by project and day
 - **XLSX Report Generation**: Generate styled Excel reports using PhpSpreadsheet
 - **Twig-based Templates**: Extensible report templates defined in Twig HTML
-- **Multi-user Support**: Each user has their own account and Toggl connection
-- **Secure Token Storage**: OAuth tokens stored encrypted in the database
+- **Multi-user Support**: Each user has their own account and API token
+- **Secure Token Storage**: API tokens stored securely in the database
 - **Docker Environment**: Complete Docker setup for easy development
 
 ## Requirements
@@ -20,6 +20,7 @@ Symfony (PHP 8.2+) application for generating styled XLSX reports from Toggl Tra
 - PostgreSQL 16
 - Composer
 - Docker and Docker Compose (for containerized setup)
+- Toggl Track API token (get it from your Toggl profile)
 
 ## Installation
 
@@ -31,28 +32,22 @@ git clone https://github.com/vvoleman/report-generator.git
 cd report-generator
 ```
 
-2. Copy `.env` file and configure your Toggl OAuth credentials:
-```bash
-cp .env .env.local
-# Edit .env.local and add your Toggl OAuth credentials
-```
-
-3. Start Docker containers:
+2. Start Docker containers:
 ```bash
 docker-compose up -d
 ```
 
-4. Install dependencies:
+3. Install dependencies:
 ```bash
 docker-compose exec php composer install
 ```
 
-5. Run database migrations:
+4. Run database migrations:
 ```bash
 docker-compose exec php php bin/console doctrine:migrations:migrate
 ```
 
-6. Access the application at `http://localhost:8080`
+5. Access the application at `http://localhost:8080`
 
 ### Manual Setup
 
@@ -66,37 +61,32 @@ composer install
 DATABASE_URL="postgresql://user:password@127.0.0.1:5432/report_generator?serverVersion=16&charset=utf8"
 ```
 
-3. Configure Toggl OAuth credentials in `.env.local`:
-```
-OAUTH_TOGGL_CLIENT_ID=your_client_id
-OAUTH_TOGGL_CLIENT_SECRET=your_client_secret
-```
-
-4. Create the database:
+3. Create the database:
 ```bash
 php bin/console doctrine:database:create
 php bin/console doctrine:migrations:migrate
 ```
 
-5. Start the Symfony development server:
+4. Start the Symfony development server:
 ```bash
 symfony server:start
 ```
 
-## Toggl OAuth Setup
+## Getting Your Toggl API Token
 
-To use this application, you need to register an OAuth application with Toggl Track:
+To use this application, you need your Toggl Track API token:
 
-1. Go to [Toggl Track Developer Portal](https://track.toggl.com/profile)
-2. Navigate to API Token section
-3. Create a new OAuth application
-4. Set the redirect URI to: `http://localhost:8080/oauth/check/toggl` (or your domain)
-5. Copy the Client ID and Client Secret to your `.env.local` file
+1. Log in to [Toggl Track](https://track.toggl.com)
+2. Click on your profile picture in the top right corner
+3. Select "Profile settings"
+4. Scroll down to find your "API Token"
+5. Click "Click to reveal" to show your token
+6. Copy the token - you'll enter it in the application settings
 
 ## Usage
 
 1. **Register/Login**: Create an account or login to existing account
-2. **Connect Toggl**: Click "Connect Toggl Account" on the dashboard
+2. **Configure API Token**: Go to Settings and enter your Toggl API token
 3. **Generate Report**: 
    - Navigate to Reports page
    - Select a month
