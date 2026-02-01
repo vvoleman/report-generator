@@ -103,6 +103,9 @@ class TogglToken
 
     public function isExpired(): bool
     {
+        if ($this->expiresAt === null) {
+            return false;
+        }
         return $this->expiresAt < new \DateTime();
     }
 }

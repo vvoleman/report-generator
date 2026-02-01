@@ -43,12 +43,39 @@ class SecurityController extends AbstractController
         }
 
         if ($request->isMethod('POST')) {
+            // Verify CSRF token
+            $submittedToken = $request->request->get('_csrf_token');
+            if (!$this->isCsrfTokenValid('register', $submittedToken)) {
+                $this->addFlash('error', 'Invalid CSRF token.');
+                return $this->render('security/register.html.twig');
+            }
+
             $email = $request->request->get('email');
             $password = $request->request->get('password');
             $passwordConfirm = $request->request->get('password_confirm');
 
+            // Validate email format
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $this->addFlash('error', 'Invalid email address.');
+                return $this->render('security/register.html.twig');
+            }
+
+            // Validate password length
+            if (strlen($password) < 6) {
+                $this->addFlash('error', 'Password must be at least 6 characters long.');
+                return $this->render('security/register.html.twig');
+            }
+
+            // Check password confirmation
             if ($password !== $passwordConfirm) {
                 $this->addFlash('error', 'Passwords do not match.');
+                return $this->render('security/register.html.twig');
+            }
+
+            // Check if user already exists
+            $existingUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+            if ($existingUser) {
+                $this->addFlash('error', 'An account with this email already exists.');
                 return $this->render('security/register.html.twig');
             }
 

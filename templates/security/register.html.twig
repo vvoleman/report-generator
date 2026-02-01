@@ -14,13 +14,15 @@
 
         <div class="form-group">
             <label for="inputPassword">Password</label>
-            <input type="password" name="password" id="inputPassword" required>
+            <input type="password" name="password" id="inputPassword" required minlength="6">
         </div>
 
         <div class="form-group">
             <label for="inputPasswordConfirm">Confirm Password</label>
             <input type="password" name="password_confirm" id="inputPasswordConfirm" required>
         </div>
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('register') }}">
 
         <button class="btn" type="submit" style="width: 100%;">Register</button>
     </form>

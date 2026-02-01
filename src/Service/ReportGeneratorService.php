@@ -27,18 +27,24 @@ class ReportGeneratorService
             throw new \InvalidArgumentException("Template '{$templateName}' not found");
         }
 
-        // Render template to get structure
-        $htmlContent = $this->twig->render($templatePath, $data);
+        try {
+            // Render template to get structure
+            $htmlContent = $this->twig->render($templatePath, $data);
 
-        // Parse HTML and populate spreadsheet
-        $this->parseHtmlToSpreadsheet($htmlContent, $sheet);
+            // Parse HTML and populate spreadsheet
+            $this->parseHtmlToSpreadsheet($htmlContent, $sheet);
 
-        // Write to file
-        $tempFile = tempnam(sys_get_temp_dir(), 'toggl_report_') . '.xlsx';
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($tempFile);
+            // Write to file
+            $tempFile = tempnam(sys_get_temp_dir(), 'toggl_report_') . '.xlsx';
+            $writer = new Xlsx($spreadsheet);
+            $writer->save($tempFile);
 
-        return $tempFile;
+            return $tempFile;
+        } catch (\Exception $e) {
+            // Clean up spreadsheet resources
+            $spreadsheet->disconnectWorksheets();
+            throw $e;
+        }
     }
 
     private function parseHtmlToSpreadsheet(string $html, $sheet): void
@@ -55,6 +61,7 @@ class ReportGeneratorService
 
         $table = $tables->item(0);
         $row = 1;
+        $maxCol = 'A';
 
         // Process table headers
         $headers = $table->getElementsByTagName('thead');
@@ -80,6 +87,9 @@ class ReportGeneratorService
                         ]
                     ]);
                     
+                    if ($col > $maxCol) {
+                        $maxCol = $col;
+                    }
                     $col++;
                 }
                 $row++;
@@ -110,15 +120,20 @@ class ReportGeneratorService
                         ]
                     ]);
                     
+                    if ($col > $maxCol) {
+                        $maxCol = $col;
+                    }
                     $col++;
                 }
                 $row++;
             }
         }
 
-        // Auto-size columns
-        foreach (range('A', 'Z') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
+        // Auto-size columns dynamically based on actual column count
+        $currentCol = 'A';
+        while ($currentCol <= $maxCol) {
+            $sheet->getColumnDimension($currentCol)->setAutoSize(true);
+            $currentCol++;
         }
     }
 }
