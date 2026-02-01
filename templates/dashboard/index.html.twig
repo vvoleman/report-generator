@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard - Toggl Report Generator{% endblock %}
+
+{% block body %}
+<h2>Welcome to Your Dashboard</h2>
+
+<div style="margin-top: 30px;">
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+        <h3 style="margin-bottom: 15px;">Toggl Account Status</h3>
+        {% if has_api_token %}
+            <p style="color: #28a745; font-weight: 500;">✓ API Token Configured</p>
+            <p style="margin-top: 10px; color: #666;">You can now generate reports from your Toggl time entries.</p>
+            <div style="margin-top: 15px;">
+                <a href="{{ path('app_reports') }}" class="btn">Generate Report</a>
+                <a href="{{ path('app_settings') }}" class="btn btn-secondary" style="margin-left: 10px;">Update Token</a>
+            </div>
+        {% else %}
+            <p style="color: #dc3545; font-weight: 500;">✗ No API Token Set</p>
+            <p style="margin-top: 10px; color: #666;">Set your Toggl API token in settings to start generating reports.</p>
+            <a href="{{ path('app_settings') }}" class="btn" style="margin-top: 15px;">Configure API Token</a>
+        {% endif %}
+    </div>
+
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+        <h3 style="margin-bottom: 15px;">Quick Start</h3>
+        <ol style="padding-left: 20px; line-height: 1.8;">
+            <li>Get your API token from your Toggl Track profile settings</li>
+            <li>Enter your API token in Settings</li>
+            <li>Select a month for which you want to generate a report</li>
+            <li>Choose a report template (or use the default)</li>
+            <li>Download your styled XLSX report</li>
+        </ol>
+    </div>
+</div>
+{% endblock %}

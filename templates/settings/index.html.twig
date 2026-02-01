@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Settings - Toggl Report Generator{% endblock %}
+
+{% block body %}
+<h2>Settings</h2>
+
+<div style="margin-top: 30px;">
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+        <h3 style="margin-bottom: 15px;">Toggl API Token</h3>
+        <p style="margin-bottom: 20px; color: #666;">
+            Enter your Toggl API token to connect your account. You can find your API token in your 
+            <a href="https://track.toggl.com/profile" target="_blank" style="color: #667eea;">Toggl Profile Settings</a>.
+        </p>
+
+        <form method="post" action="{{ path('app_settings_save_token') }}">
+            <div class="form-group">
+                <label for="api_token">API Token</label>
+                <input 
+                    type="text" 
+                    name="api_token" 
+                    id="api_token" 
+                    value="{{ current_token }}" 
+                    placeholder="Enter your Toggl API token"
+                    required
+                    style="font-family: monospace;">
+                <small style="color: #666; display: block; margin-top: 5px;">
+                    Your API token is stored securely and never shared.
+                </small>
+            </div>
+
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('save_toggl_token') }}">
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" class="btn">Save API Token</button>
+                <a href="{{ path('app_dashboard') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <div style="background: #fff3cd; padding: 20px; border-radius: 10px; border: 1px solid #ffc107;">
+        <h4 style="margin-bottom: 10px; color: #856404;">How to get your API Token:</h4>
+        <ol style="padding-left: 20px; line-height: 1.8; color: #856404;">
+            <li>Log in to <a href="https://track.toggl.com" target="_blank" style="color: #667eea;">Toggl Track</a></li>
+            <li>Click on your profile picture in the top right corner</li>
+            <li>Select "Profile settings"</li>
+            <li>Scroll down to find your "API Token"</li>
+            <li>Click "Click to reveal" to show your token</li>
+            <li>Copy the token and paste it above</li>
+        </ol>
+    </div>
+</div>
+{% endblock %}

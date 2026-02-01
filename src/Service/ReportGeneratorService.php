@@ -1,0 +1,186 @@
+<?php
+
+namespace App\Service;
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+
+class ReportGeneratorService
+{
+    public function __construct(
+        private TemplateRegistry $templateRegistry
+    ) {
+    }
+
+    public function generateXlsx(array $timeEntries, array $context, string $templateName = 'default'): string
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Get template from registry
+        $template = $this->templateRegistry->getTemplate($templateName);
+        if (!$template) {
+            throw new \InvalidArgumentException("Template '{$templateName}' not found");
+        }
+
+        try {
+            // Generate HTML using the template
+            $htmlContent = $template->generateHtml($timeEntries, $context);
+
+            // Parse HTML and populate spreadsheet
+            $this->parseHtmlToSpreadsheet($htmlContent, $sheet);
+
+            // Write to file
+            $tempFile = tempnam(sys_get_temp_dir(), 'toggl_report_') . '.xlsx';
+            $writer = new Xlsx($spreadsheet);
+            $writer->save($tempFile);
+
+            return $tempFile;
+        } catch (\Exception $e) {
+            // Clean up spreadsheet resources
+            $spreadsheet->disconnectWorksheets();
+            throw $e;
+        }
+    }
+
+    private function parseHtmlToSpreadsheet(string $html, $sheet): void
+    {
+        // Simple HTML table parser
+        $dom = new \DOMDocument();
+        @$dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+        $tables = $dom->getElementsByTagName('table');
+        
+        if ($tables->length === 0) {
+            return;
+        }
+
+        $table = $tables->item(0);
+        $row = 1;
+        $maxCol = 'A';
+
+        // Process table headers
+        $headers = $table->getElementsByTagName('thead');
+        if ($headers->length > 0) {
+            $headerRows = $headers->item(0)->getElementsByTagName('tr');
+            foreach ($headerRows as $tr) {
+                $col = 'A';
+                $ths = $tr->getElementsByTagName('th');
+                foreach ($ths as $th) {
+                    $value = trim($th->textContent);
+                    $sheet->setCellValue($col . $row, $value);
+                    
+                    // Style header
+                    $sheet->getStyle($col . $row)->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                        'fill' => [
+                            'fillType' => Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => '4472C4']
+                        ],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                        'borders' => [
+                            'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+                        ]
+                    ]);
+                    
+                    if ($col > $maxCol) {
+                        $maxCol = $col;
+                    }
+                    $col++;
+                }
+                $row++;
+            }
+        }
+
+        // Process table body
+        $bodies = $table->getElementsByTagName('tbody');
+        if ($bodies->length > 0) {
+            $bodyRows = $bodies->item(0)->getElementsByTagName('tr');
+            foreach ($bodyRows as $tr) {
+                $col = 'A';
+                $tds = $tr->getElementsByTagName('td');
+                
+                // Check if row is a weekend row (has class="weekend")
+                $isWeekend = $tr->getAttribute('class') === 'weekend';
+                
+                foreach ($tds as $td) {
+                    $value = trim($td->textContent);
+                    
+                    // Try to parse as number
+                    if (is_numeric($value)) {
+                        $sheet->setCellValue($col . $row, (float)$value);
+                    } else {
+                        $sheet->setCellValue($col . $row, $value);
+                    }
+                    
+                    // Style body cells
+                    $styleArray = [
+                        'borders' => [
+                            'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+                        ]
+                    ];
+                    
+                    // Gray out weekends
+                    if ($isWeekend) {
+                        $styleArray['fill'] = [
+                            'fillType' => Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => 'E0E0E0']
+                        ];
+                    }
+                    
+                    $sheet->getStyle($col . $row)->applyFromArray($styleArray);
+                    
+                    if ($col > $maxCol) {
+                        $maxCol = $col;
+                    }
+                    $col++;
+                }
+                $row++;
+            }
+        }
+
+        // Process table footer
+        $footers = $table->getElementsByTagName('tfoot');
+        if ($footers->length > 0) {
+            $footerRows = $footers->item(0)->getElementsByTagName('tr');
+            foreach ($footerRows as $tr) {
+                $col = 'A';
+                $tds = $tr->getElementsByTagName('td');
+                foreach ($tds as $td) {
+                    $value = trim($td->textContent);
+                    
+                    // Try to parse as number
+                    if (is_numeric($value)) {
+                        $sheet->setCellValue($col . $row, (float)$value);
+                    } else {
+                        $sheet->setCellValue($col . $row, $value);
+                    }
+                    
+                    // Style footer cells (bold)
+                    $sheet->getStyle($col . $row)->applyFromArray([
+                        'font' => ['bold' => true],
+                        'borders' => [
+                            'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+                        ]
+                    ]);
+                    
+                    if ($col > $maxCol) {
+                        $maxCol = $col;
+                    }
+                    $col++;
+                }
+                $row++;
+            }
+        }
+
+        // Auto-size columns dynamically based on actual column count
+        $currentCol = 'A';
+        while ($currentCol <= $maxCol) {
+            $sheet->getColumnDimension($currentCol)->setAutoSize(true);
+            $currentCol++;
+        }
+    }
+}

@@ -1,0 +1,24 @@
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Project</th>
+            <th>Hours</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in entries %}
+        <tr>
+            <td>{{ entry.date }}</td>
+            <td>{{ entry.project_name }}</td>
+            <td>{{ entry.total_hours }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="2"><strong>Total</strong></td>
+            <td><strong>{{ total_hours }}</strong></td>
+        </tr>
+    </tfoot>
+</table>
