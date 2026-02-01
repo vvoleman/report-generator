@@ -1,0 +1,22 @@
+<table>
+    <thead>
+        <tr>
+            <th>Project</th>
+            <th>Total Hours</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for project in summary %}
+        <tr>
+            <td>{{ project.project_name }}</td>
+            <td>{{ project.total_hours }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td><strong>Total</strong></td>
+            <td><strong>{{ total_hours }}</strong></td>
+        </tr>
+    </tfoot>
+</table>
