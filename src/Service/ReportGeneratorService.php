@@ -21,8 +21,14 @@ class ReportGeneratorService
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
+        // Validate template exists
+        $templatePath = "reports/{$templateName}.html.twig";
+        if (!$this->twig->getLoader()->exists($templatePath)) {
+            throw new \InvalidArgumentException("Template '{$templateName}' not found");
+        }
+
         // Render template to get structure
-        $htmlContent = $this->twig->render("reports/{$templateName}.html.twig", $data);
+        $htmlContent = $this->twig->render($templatePath, $data);
 
         // Parse HTML and populate spreadsheet
         $this->parseHtmlToSpreadsheet($htmlContent, $sheet);
