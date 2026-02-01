@@ -1,9 +1,0 @@
-knpu_oauth2_client:
-    clients:
-        toggl:
-            type: generic
-            provider_class: App\OAuth\TogglProvider
-            client_id: '%env(OAUTH_TOGGL_CLIENT_ID)%'
-            client_secret: '%env(OAUTH_TOGGL_CLIENT_SECRET)%'
-            redirect_route: oauth_toggl_check
-            redirect_params: {}

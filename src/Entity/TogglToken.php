@@ -20,16 +20,13 @@ class TogglToken
     private ?User $user = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $accessToken = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $refreshToken = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $expiresAt = null;
+    private ?string $apiToken = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $updatedAt = null;
 
     public function __construct()
     {
@@ -53,38 +50,15 @@ class TogglToken
         return $this;
     }
 
-    public function getAccessToken(): ?string
+    public function getApiToken(): ?string
     {
-        return $this->accessToken;
+        return $this->apiToken;
     }
 
-    public function setAccessToken(string $accessToken): static
+    public function setApiToken(string $apiToken): static
     {
-        $this->accessToken = $accessToken;
-
-        return $this;
-    }
-
-    public function getRefreshToken(): ?string
-    {
-        return $this->refreshToken;
-    }
-
-    public function setRefreshToken(?string $refreshToken): static
-    {
-        $this->refreshToken = $refreshToken;
-
-        return $this;
-    }
-
-    public function getExpiresAt(): ?\DateTimeInterface
-    {
-        return $this->expiresAt;
-    }
-
-    public function setExpiresAt(\DateTimeInterface $expiresAt): static
-    {
-        $this->expiresAt = $expiresAt;
+        $this->apiToken = $apiToken;
+        $this->updatedAt = new \DateTime();
 
         return $this;
     }
@@ -101,11 +75,15 @@ class TogglToken
         return $this;
     }
 
-    public function isExpired(): bool
+    public function getUpdatedAt(): ?\DateTimeInterface
     {
-        if ($this->expiresAt === null) {
-            return false;
-        }
-        return $this->expiresAt < new \DateTime();
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeInterface $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
     }
 }

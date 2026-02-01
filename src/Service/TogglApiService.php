@@ -13,10 +13,10 @@ class TogglApiService
     ) {
     }
 
-    public function getTimeEntries(string $accessToken, \DateTime $startDate, \DateTime $endDate): array
+    public function getTimeEntries(string $apiToken, \DateTime $startDate, \DateTime $endDate): array
     {
         $response = $this->httpClient->request('GET', self::API_BASE_URL . '/me/time_entries', [
-            'auth_bearer' => $accessToken,
+            'auth_basic' => [$apiToken, 'api_token'],
             'query' => [
                 'start_date' => $startDate->format('Y-m-d'),
                 'end_date' => $endDate->format('Y-m-d'),
@@ -26,28 +26,28 @@ class TogglApiService
         return $response->toArray();
     }
 
-    public function getProjects(string $accessToken, int $workspaceId): array
+    public function getProjects(string $apiToken, int $workspaceId): array
     {
         $response = $this->httpClient->request('GET', self::API_BASE_URL . "/workspaces/{$workspaceId}/projects", [
-            'auth_bearer' => $accessToken,
+            'auth_basic' => [$apiToken, 'api_token'],
         ]);
 
         return $response->toArray();
     }
 
-    public function getWorkspaces(string $accessToken): array
+    public function getWorkspaces(string $apiToken): array
     {
         $response = $this->httpClient->request('GET', self::API_BASE_URL . '/me/workspaces', [
-            'auth_bearer' => $accessToken,
+            'auth_basic' => [$apiToken, 'api_token'],
         ]);
 
         return $response->toArray();
     }
 
-    public function getCurrentUser(string $accessToken): array
+    public function getCurrentUser(string $apiToken): array
     {
         $response = $this->httpClient->request('GET', self::API_BASE_URL . '/me', [
-            'auth_bearer' => $accessToken,
+            'auth_basic' => [$apiToken, 'api_token'],
         ]);
 
         return $response->toArray();

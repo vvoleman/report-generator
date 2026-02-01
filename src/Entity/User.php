@@ -119,11 +119,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getActiveTogglToken(): ?TogglToken
     {
-        foreach ($this->togglTokens as $token) {
-            if (!$token->isExpired()) {
-                return $token;
-            }
+        // Return the most recent token
+        $tokens = $this->togglTokens->toArray();
+        if (empty($tokens)) {
+            return null;
         }
-        return null;
+        
+        usort($tokens, function($a, $b) {
+            return $b->getCreatedAt() <=> $a->getCreatedAt();
+        });
+        
+        return $tokens[0];
     }
 }

@@ -26,8 +26,8 @@ class ReportController extends AbstractController
         $user = $this->getUser();
         $togglToken = $user ? $user->getActiveTogglToken() : null;
 
-        if (!$togglToken || $togglToken->isExpired()) {
-            $this->addFlash('error', 'Please connect your Toggl account first.');
+        if (!$togglToken) {
+            $this->addFlash('error', 'Please set your Toggl API token in settings first.');
             return $this->redirectToRoute('app_dashboard');
         }
 
@@ -40,8 +40,8 @@ class ReportController extends AbstractController
         $user = $this->getUser();
         $togglToken = $user->getActiveTogglToken();
 
-        if (!$togglToken || $togglToken->isExpired()) {
-            $this->addFlash('error', 'Please connect your Toggl account first.');
+        if (!$togglToken) {
+            $this->addFlash('error', 'Please set your Toggl API token in settings first.');
             return $this->redirectToRoute('app_dashboard');
         }
 
@@ -59,7 +59,7 @@ class ReportController extends AbstractController
             $endDate = new \DateTime($date->format('Y-m-t'));
 
             $timeEntries = $this->togglApi->getTimeEntries(
-                $togglToken->getAccessToken(),
+                $togglToken->getApiToken(),
                 $startDate,
                 $endDate
             );

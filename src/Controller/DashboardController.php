@@ -14,10 +14,10 @@ class DashboardController extends AbstractController
         $user = $this->getUser();
         
         $togglToken = $user ? $user->getActiveTogglToken() : null;
-        $isTogglConnected = $togglToken !== null && !$togglToken->isExpired();
+        $hasApiToken = $togglToken !== null;
 
         return $this->render('dashboard/index.html.twig', [
-            'is_toggl_connected' => $isTogglConnected,
+            'has_api_token' => $hasApiToken,
         ]);
     }
 }
