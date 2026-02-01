@@ -18,9 +18,9 @@
         <div class="form-group">
             <label for="template">Report Template</label>
             <select name="template" id="template" required>
-                <option value="default">Default Template</option>
-                <option value="detailed">Detailed Template</option>
-                <option value="summary">Summary Template</option>
+                {% for label, value in templates %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
             </select>
             <small style="color: #666; display: block; margin-top: 5px;">
                 Choose a template for your report layout.
@@ -40,6 +40,7 @@
         <li><strong>Default:</strong> Shows time entries grouped by project and day with totals</li>
         <li><strong>Detailed:</strong> Includes individual entry descriptions and more granular data</li>
         <li><strong>Summary:</strong> Project-level aggregation only, perfect for quick overviews</li>
+        <li><strong>Daily Summary:</strong> Lists all days in the month with total hours worked (weekends grayed out)</li>
     </ul>
 </div>
 {% endblock %}

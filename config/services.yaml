@@ -4,6 +4,7 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    app.toggl_cache_enabled: '%env(bool:TOGGL_CACHE_ENABLED)%'
 
 services:
     # default configuration for services in *this* file
@@ -19,6 +20,24 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+
+    # Register report templates
+    App\ReportTemplate\DefaultTemplate:
+        tags: ['app.report_template']
+
+    App\ReportTemplate\DetailedTemplate:
+        tags: ['app.report_template']
+
+    App\ReportTemplate\SummaryTemplate:
+        tags: ['app.report_template']
+
+    App\ReportTemplate\DailyTemplate:
+        tags: ['app.report_template']
+
+    # Template registry with tagged templates
+    App\Service\TemplateRegistry:
+        arguments:
+            $templates: !tagged_iterator app.report_template
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

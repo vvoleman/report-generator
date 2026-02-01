@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Service\ReportAggregationService;
 use App\Service\ReportGeneratorService;
+use App\Service\TemplateRegistry;
 use App\Service\TogglApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -15,8 +15,8 @@ class ReportController extends AbstractController
 {
     public function __construct(
         private TogglApiService $togglApi,
-        private ReportAggregationService $aggregationService,
-        private ReportGeneratorService $generatorService
+        private ReportGeneratorService $generatorService,
+        private TemplateRegistry $templateRegistry
     ) {
     }
 
@@ -31,7 +31,11 @@ class ReportController extends AbstractController
             return $this->redirectToRoute('app_dashboard');
         }
 
-        return $this->render('reports/index.html.twig');
+        $templates = $this->templateRegistry->getTemplateChoices();
+
+        return $this->render('reports/index.html.twig', [
+            'templates' => $templates,
+        ]);
     }
 
     #[Route('/reports/generate', name: 'app_reports_generate', methods: ['POST'])]
@@ -64,19 +68,13 @@ class ReportController extends AbstractController
                 $endDate
             );
 
-            $aggregatedData = $this->aggregationService->aggregateByProjectAndDay($timeEntries);
-            $projectSummary = $this->aggregationService->aggregateByProject($timeEntries);
-
-            $reportData = [
+            $context = [
                 'month' => $date->format('F Y'),
                 'start_date' => $startDate->format('Y-m-d'),
                 'end_date' => $endDate->format('Y-m-d'),
-                'entries' => $aggregatedData,
-                'summary' => $projectSummary,
-                'total_hours' => array_sum(array_column($projectSummary, 'total_hours')),
             ];
 
-            $filePath = $this->generatorService->generateXlsx($reportData, $template);
+            $filePath = $this->generatorService->generateXlsx($timeEntries, $context, $template);
 
             $response = new BinaryFileResponse($filePath);
             $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
